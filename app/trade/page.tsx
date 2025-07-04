@@ -58,30 +58,30 @@ export default function TradePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#181A20] flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-sm mb-6">
-        <div className="bg-[#23242b] rounded-xl p-4 mb-2">
+        <div className="bg-green-900/20 rounded-xl p-4 mb-2">
           <div className="text-white font-bold mb-2 text-sm">Latest pump.fun Tokens</div>
           <div className="flex flex-col gap-2 max-h-40 overflow-y-auto">
-            {tokens.length === 0 && <div className="text-xs text-gray-400">Loading...</div>}
+            {tokens.length === 0 && <div className="text-xs text-green-400">Loading...</div>}
             {tokens.map((t, i) => (
-              <div key={t.ca + i} className="flex items-center gap-2 text-xs bg-[#181A20] rounded p-2">
-                <span className="font-bold text-[#1ED760]">{t.name}</span>
-                <span className="text-gray-400">CA: {t.ca.slice(0, 4)}...{t.ca.slice(-4)}</span>
-                <span className="text-yellow-400 ml-auto">MC: {t.marketCap}</span>
+              <div key={t.ca + i} className="flex items-center gap-2 text-xs bg-black/50 rounded p-2">
+                <span className="font-bold text-green-400">{t.name}</span>
+                <span className="text-green-500">CA: {t.ca.slice(0, 4)}...{t.ca.slice(-4)}</span>
+                <span className="text-green-300 ml-auto">MC: {t.marketCap}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
       
-      <div className="bg-[#23242b] rounded-xl p-6 w-full max-w-sm shadow-lg">
+      <div className="bg-green-900/20 rounded-xl p-6 w-full max-w-sm shadow-lg">
         <TokenTrade />
       </div>
       
       <div className="flex gap-4 mt-8">
         <Button
-          className="bg-[#1ED760] text-black font-semibold px-6 py-2 rounded hover:bg-[#1bc653] transition-colors"
+          className="bg-green-600 text-black font-semibold px-6 py-2 rounded-xl hover:bg-green-700 hover:shadow-lg hover:shadow-green-500/50 transform transition-all duration-200 hover:scale-105 active:scale-95"
           onClick={handleCreateWallet}
           disabled={creating}
         >
@@ -89,18 +89,18 @@ export default function TradePage() {
         </Button>
         <div className="wallet-adapter-button-wrapper">
           <WalletMultiButton 
-            className="!bg-[#1ED760] !text-black !font-semibold !px-6 !py-2 !rounded !hover:bg-[#1bc653] !transition-colors !border-none" 
+            className="!bg-green-600 !text-black !font-semibold !px-6 !py-2 !rounded-xl !hover:bg-green-700 !hover:shadow-lg !hover:shadow-green-500/50 !transform !transition-all !duration-200 !hover:scale-105 !active:scale-95 !border-none" 
           />
         </div>
       </div>
       
       {createdWallet && (
-        <div className="mt-6 bg-[#23242b] text-white p-4 rounded max-w-sm w-full break-words text-xs">
+        <div className="mt-6 bg-green-900/20 text-white p-4 rounded max-w-sm w-full break-words text-xs">
           <div className="mb-2 font-bold">New Wallet Created</div>
           <div><b>Public Key:</b> {createdWallet.publicKey}</div>
           <div><b>Private Key:</b> {createdWallet.privateKey}</div>
           <div><b>API Key:</b> {createdWallet.apiKey}</div>
-          <div className="mt-2 text-yellow-400">Save your private key securely!</div>
+          <div className="mt-2 text-green-400">Save your private key securely!</div>
         </div>
       )}
     </div>

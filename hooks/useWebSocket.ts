@@ -40,6 +40,7 @@ export const useWebSocket = () => {
   const [newTokens, setNewTokens] = useState<TokenData[]>([])
   const [bondingTokens, setBondingTokens] = useState<TokenData[]>([])
   const [graduatedTokens, setGraduatedTokens] = useState<TokenData[]>([])
+  const [trendingTokens, setTrendingTokens] = useState<TokenData[]>([])
   const [isConnected, setIsConnected] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const wsRef = useRef<WebSocket | null>(null)
@@ -80,6 +81,70 @@ export const useWebSocket = () => {
     const newTokensList: TokenData[] = []
     const bondingTokensList: TokenData[] = []
     const graduatedTokensList: TokenData[] = []
+    
+    // Create trending tokens list sorted by market cap (highest first)
+    // Include tokens with market cap > 0 OR tokens that are newly created with price data
+    let trendingTokensList = [...tokens]
+      .filter(token => {
+        // Include tokens with explicit market cap value
+        if (token.market_cap_value && token.market_cap_value > 0) {
+          return true
+        }
+        // Include newly created tokens with price data (calculate estimated market cap)
+        if (token.price && token.created_timestamp > Date.now() - 24 * 60 * 60 * 1000) { // Last 24 hours
+          return true
+        }
+        return false
+      })
+      .map(token => {
+        // Calculate estimated market cap if not available but price exists
+        let estimatedMarketCap = token.market_cap_value || 0
+        if (!estimatedMarketCap && token.price) {
+          const priceValue = typeof token.price === 'string' 
+            ? parseFloat(token.price.replace('$', '')) 
+            : token.price
+          // Simple estimation: assume 1B token supply for market cap calculation
+          estimatedMarketCap = priceValue * 1000000000
+        }
+        
+        return {
+          ...token,
+          market_cap_value: estimatedMarketCap,
+          market_cap: estimatedMarketCap > 0 ? `$${estimatedMarketCap.toLocaleString()}` : token.market_cap
+        }
+      })
+      .sort((a, b) => (b.market_cap_value || 0) - (a.market_cap_value || 0))
+
+    // If we don't have enough trending tokens with market cap data, 
+    // add recently created tokens sorted by creation time
+    if (trendingTokensList.length < 10) {
+      const recentTokens = tokens
+        .filter(token => {
+          // Don't include tokens already in trending list
+          return !trendingTokensList.some(t => t.mint === token.mint) &&
+                 token.created_timestamp > Date.now() - 24 * 60 * 60 * 1000
+        })
+        .sort((a, b) => b.created_timestamp - a.created_timestamp)
+        .slice(0, 20 - trendingTokensList.length)
+        .map(token => ({
+          ...token,
+          market_cap_value: token.market_cap_value || 0
+        }))
+
+      trendingTokensList = [...trendingTokensList, ...recentTokens]
+    }
+
+    // Limit to top 50 tokens
+    trendingTokensList = trendingTokensList.slice(0, 50)
+
+    // Log trending tokens for debugging
+    console.log('Trending tokens calculated:', trendingTokensList.map(t => ({
+      symbol: t.symbol,
+      marketCap: t.market_cap_value,
+      price: t.price,
+      isNew: t.created_timestamp > Date.now() - 24 * 60 * 60 * 1000,
+      createdAt: new Date(t.created_timestamp).toLocaleString()
+    })))
 
     tokens.forEach((token) => {
       switch (token.category) {
@@ -98,6 +163,7 @@ export const useWebSocket = () => {
     setNewTokens(newTokensList)
     setBondingTokens(bondingTokensList)
     setGraduatedTokens(graduatedTokensList)
+    setTrendingTokens(trendingTokensList)
   }, [])
 
   const processNewToken = useCallback(
@@ -155,9 +221,9 @@ export const useWebSocket = () => {
         const signature = tokenInfo.signature || tokenInfo.txId || tokenInfo.transaction
 
         // Extract price and market data if available
-        const initialPrice = tokenInfo.price || tokenInfo.initialPrice || tokenInfo.sol_amount
-        const marketCap = tokenInfo.market_cap || tokenInfo.marketCap || tokenInfo.fdv || tokenInfo.usd_market_cap
-        const liquidity = tokenInfo.liquidity || tokenInfo.liquidityPool
+        const initialPrice = tokenInfo.price || tokenInfo.initialPrice || tokenInfo.sol_amount || tokenInfo.priceInSol
+        const marketCap = tokenInfo.market_cap || tokenInfo.marketCap || tokenInfo.fdv || tokenInfo.usd_market_cap || tokenInfo.mcap
+        const liquidity = tokenInfo.liquidity || tokenInfo.liquidityPool || tokenInfo.liquidityUsd
 
         // Parse market cap value for categorization
         let marketCapValue = 0
@@ -170,6 +236,25 @@ export const useWebSocket = () => {
             marketCapValue = Number.parseFloat(cleanMarketCap) || 0
           }
         }
+
+        // If no market cap but we have price, try to calculate estimated market cap
+        if (!marketCapValue && initialPrice) {
+          const priceValue = typeof initialPrice === 'string' 
+            ? parseFloat(initialPrice.replace('$', '')) 
+            : initialPrice
+          if (priceValue > 0) {
+            // Use token supply data if available, otherwise estimate with 1B supply
+            const tokenSupply = tokenInfo.supply || tokenInfo.totalSupply || 1000000000
+            marketCapValue = priceValue * tokenSupply
+          }
+        }
+
+        console.log("Market cap extraction:", {
+          rawMarketCap: marketCap,
+          rawPrice: initialPrice,
+          calculatedMarketCap: marketCapValue,
+          tokenSupply: tokenInfo.supply || tokenInfo.totalSupply || "estimated 1B"
+        })
 
         // Get timestamp
         const timestamp = tokenInfo.timestamp || tokenInfo.blockTime || tokenInfo.created_timestamp || Date.now()
@@ -352,6 +437,7 @@ export const useWebSocket = () => {
     newTokens,
     bondingTokens,
     graduatedTokens,
+    trendingTokens,
     isConnected,
     error,
     rawMessages,

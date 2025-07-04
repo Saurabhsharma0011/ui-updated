@@ -86,6 +86,13 @@ export const usePriceData = (tokenMints: string[], onPriceUpdate?: (mint: string
             const price = await fetchTokenPrice(mint)
             if (price) {
               newPriceData[mint] = price
+              console.log(`Successfully fetched price data for ${mint}:`, {
+                price: price.price,
+                marketCap: price.marketCap,
+                volume24h: price.volume24h
+              })
+            } else {
+              console.log(`No price data available for newly created token: ${mint}`)
             }
           } catch (error) {
             console.log(`Skipping price fetch for ${mint} due to error:`, error)

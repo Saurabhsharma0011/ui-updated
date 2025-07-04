@@ -10,13 +10,13 @@ export const SocialLinks = ({ twitter, telegram, website }: SocialLinksProps) =>
   if (!twitter && !telegram && !website) return null
 
   return (
-    <div className="flex gap-3 pt-2 border-t border-slate-800">
+    <div className="flex gap-3 pt-2 border-t border-green-800">
       {twitter && (
         <a
           href={twitter}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1 text-slate-400 hover:text-blue-400 transition-colors text-xs"
+          className="flex items-center gap-1 text-green-400 hover:text-green-300 transition-colors text-xs"
           title="Twitter"
         >
           <span className="text-sm">🐦</span>
@@ -28,7 +28,7 @@ export const SocialLinks = ({ twitter, telegram, website }: SocialLinksProps) =>
           href={telegram}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1 text-slate-400 hover:text-blue-400 transition-colors text-xs"
+          className="flex items-center gap-1 text-green-400 hover:text-green-300 transition-colors text-xs"
           title="Telegram"
         >
           <span className="text-sm">✈️</span>
@@ -40,7 +40,7 @@ export const SocialLinks = ({ twitter, telegram, website }: SocialLinksProps) =>
           href={website}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1 text-slate-400 hover:text-blue-400 transition-colors text-xs"
+          className="flex items-center gap-1 text-green-400 hover:text-green-300 transition-colors text-xs"
           title="Website"
         >
           <span className="text-sm">🌐</span>

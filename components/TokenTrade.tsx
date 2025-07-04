@@ -95,26 +95,26 @@ export const TokenTrade = ({ tokenMint = "", tokenName = "", tokenSymbol = "", d
   };
 
   return (
-    <Card className="bg-[#23242b] border-[#35363c] shadow-lg w-full">
+    <Card className="bg-transparent border border-primary/30 shadow-lg shadow-primary/20 w-full">
       <CardContent className="p-6">
         <Tabs value={tab} onValueChange={(value) => setTab(value as "buy" | "sell")}>
-          <TabsList className="grid w-full grid-cols-2 mb-4">
+          <TabsList className="grid w-full grid-cols-2 mb-4 bg-primary/10 border border-primary/30">
             <TabsTrigger 
               value="buy" 
-              className={tab === "buy" ? "bg-[#1ED760] text-black font-semibold" : ""}
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-xl transition-all duration-200 hover:scale-105"
             >
               Buy {tokenSymbol || "Token"}
             </TabsTrigger>
             <TabsTrigger 
               value="sell" 
-              className={tab === "sell" ? "bg-[#FF4B4B] text-white font-semibold" : ""}
+              className="data-[state=active]:bg-destructive data-[state=active]:text-destructive-foreground rounded-xl transition-all duration-200 hover:scale-105"
             >
               Sell {tokenSymbol || "Token"}
             </TabsTrigger>
           </TabsList>
           
           {connected && publicKey && (
-            <div className="mb-4 text-xs text-white bg-[#181A20] rounded p-2 flex flex-col gap-1">
+            <div className="mb-4 text-xs text-foreground bg-primary/10 border border-primary/30 rounded p-2 flex flex-col gap-1">
               <span>Wallet: {publicKey.toBase58().slice(0, 4)}...{publicKey.toBase58().slice(-4)}</span>
               <span>Balance: {balance !== null ? balance.toFixed(4) : '...'} SOL</span>
             </div>
@@ -123,7 +123,7 @@ export const TokenTrade = ({ tokenMint = "", tokenName = "", tokenSymbol = "", d
           {(!tokenMint || tokenMint === "") && (
             <div className="mb-2">
               <Input
-                className="w-full bg-[#181A20] border border-[#35363c] rounded px-3 py-2 text-white mb-2 text-xs"
+                className="w-full bg-transparent border border-primary/30 rounded px-3 py-2 text-foreground mb-2 text-xs"
                 placeholder="Paste token CA here"
                 value={tokenCA}
                 onChange={e => setTokenCA(e.target.value)}
@@ -133,31 +133,31 @@ export const TokenTrade = ({ tokenMint = "", tokenName = "", tokenSymbol = "", d
 
           <TabsContent value="buy">
             <div className="flex justify-between mb-2">
-              <Button variant="outline" size="sm" className="text-[#1ED760] border-[#1ED760]">
+              <Button variant="outline" size="sm" className="text-primary border-primary/30 rounded-xl hover:shadow-lg hover:shadow-primary/30 transform transition-all duration-200 hover:scale-105 active:scale-95">
                 Set Max Slippage
               </Button>
             </div>
-            <div className="flex items-center bg-[#181A20] rounded px-3 py-2 mb-3 border border-[#35363c]">
+            <div className="flex items-center bg-primary/10 rounded px-3 py-2 mb-3 border border-primary/30">
               <Input
-                className="bg-transparent border-none outline-none text-white flex-1 text-lg"
+                className="bg-transparent border-none outline-none text-foreground flex-1 text-lg"
                 type="number"
                 placeholder="0"
                 value={amount}
                 onChange={e => setAmount(e.target.value)}
                 disabled={txLoading}
               />
-              <span className="mx-2 text-white font-semibold">SOL</span>
+              <span className="mx-2 text-foreground font-semibold">SOL</span>
               <Image src="/solana.svg" alt="Solana" width={28} height={28} />
             </div>
             <div className="flex gap-2 mb-4">
-              <Button variant="outline" size="sm" onClick={() => setAmount("")}>Reset</Button>
-              <Button variant="outline" size="sm" onClick={() => setAmount("0.1")}>0.1 SOL</Button>
-              <Button variant="outline" size="sm" onClick={() => setAmount("0.5")}>0.5 SOL</Button>
-              <Button variant="outline" size="sm" onClick={() => setAmount("1")}>1 SOL</Button>
-              <Button variant="outline" size="sm" onClick={() => setAmount(balance ? balance.toString() : "")}>Max</Button>
+              <Button variant="outline" size="sm" className="rounded-xl hover:shadow-lg hover:shadow-primary/30 transform transition-all duration-200 hover:scale-105 active:scale-95" onClick={() => setAmount("")}>Reset</Button>
+              <Button variant="outline" size="sm" className="rounded-xl hover:shadow-lg hover:shadow-primary/30 transform transition-all duration-200 hover:scale-105 active:scale-95" onClick={() => setAmount("0.1")}>0.1</Button>
+              <Button variant="outline" size="sm" className="rounded-xl hover:shadow-lg hover:shadow-primary/30 transform transition-all duration-200 hover:scale-105 active:scale-95" onClick={() => setAmount("0.5")}>0.5</Button>
+              <Button variant="outline" size="sm" className="rounded-xl hover:shadow-lg hover:shadow-primary/30 transform transition-all duration-200 hover:scale-105 active:scale-95" onClick={() => setAmount("1")}>1</Button>
+              <Button variant="outline" size="sm" className="rounded-xl hover:shadow-lg hover:shadow-primary/30 transform transition-all duration-200 hover:scale-105 active:scale-95" onClick={() => setAmount(balance ? balance.toString() : "")}>Max</Button>
             </div>
             <Button
-              className="w-full bg-[#1ED760] text-black font-semibold py-2 rounded mt-2 disabled:opacity-60"
+              className="w-full bg-primary text-primary-foreground font-semibold py-2 rounded-xl mt-2 disabled:opacity-60 hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/50 transform transition-all duration-200 hover:scale-105 active:scale-95"
               onClick={handleTrade}
               disabled={!connected || txLoading}
             >
@@ -167,31 +167,31 @@ export const TokenTrade = ({ tokenMint = "", tokenName = "", tokenSymbol = "", d
 
           <TabsContent value="sell">
             <div className="flex justify-end mb-2">
-              <Button variant="outline" size="sm">Set Max Slippage</Button>
+              <Button variant="outline" size="sm" className="rounded-xl hover:shadow-lg hover:shadow-primary/30 transform transition-all duration-200 hover:scale-105 active:scale-95">Set Max Slippage</Button>
             </div>
-            <div className="flex items-center bg-[#181A20] rounded px-3 py-2 mb-3 border border-[#35363c]">
+            <div className="flex items-center bg-primary/10 rounded px-3 py-2 mb-3 border border-primary/30">
               <Input
-                className="bg-transparent border-none outline-none text-white flex-1 text-lg"
+                className="bg-transparent border-none outline-none text-foreground flex-1 text-lg"
                 type="number"
                 placeholder="0"
                 value={amount}
                 onChange={e => setAmount(e.target.value)}
                 disabled={txLoading}
               />
-              <span className="mx-2 text-white font-semibold">{tokenSymbol || "Token"}</span>
-              <div className="h-7 w-7 bg-gray-700 rounded-full overflow-hidden flex items-center justify-center">
-                <span className="text-xs font-bold text-white">T</span>
+              <span className="mx-2 text-foreground font-semibold">{tokenSymbol || "Token"}</span>
+              <div className="h-7 w-7 bg-primary/20 border border-primary rounded-full overflow-hidden flex items-center justify-center">
+                <span className="text-xs font-bold text-primary">T</span>
               </div>
             </div>
             <div className="flex gap-2 mb-4">
-              <Button variant="outline" size="sm" onClick={() => setAmount("")}>Reset</Button>
-              <Button variant="outline" size="sm" onClick={() => setAmount("25")}>25%</Button>
-              <Button variant="outline" size="sm" onClick={() => setAmount("50")}>50%</Button>
-              <Button variant="outline" size="sm" onClick={() => setAmount("75")}>75%</Button>
-              <Button variant="outline" size="sm" onClick={() => setAmount("100")}>100%</Button>
+              <Button variant="outline" size="sm" className="rounded-xl hover:shadow-lg hover:shadow-primary/30 transform transition-all duration-200 hover:scale-105 active:scale-95" onClick={() => setAmount("")}>Reset</Button>
+              <Button variant="outline" size="sm" className="rounded-xl hover:shadow-lg hover:shadow-primary/30 transform transition-all duration-200 hover:scale-105 active:scale-95" onClick={() => setAmount("25")}>25%</Button>
+              <Button variant="outline" size="sm" className="rounded-xl hover:shadow-lg hover:shadow-primary/30 transform transition-all duration-200 hover:scale-105 active:scale-95" onClick={() => setAmount("50")}>50%</Button>
+              <Button variant="outline" size="sm" className="rounded-xl hover:shadow-lg hover:shadow-primary/30 transform transition-all duration-200 hover:scale-105 active:scale-95" onClick={() => setAmount("75")}>75%</Button>
+              <Button variant="outline" size="sm" className="rounded-xl hover:shadow-lg hover:shadow-primary/30 transform transition-all duration-200 hover:scale-105 active:scale-95" onClick={() => setAmount("100")}>100%</Button>
             </div>
             <Button
-              className="w-full bg-[#FF4B4B] text-white font-semibold py-2 rounded mt-2 disabled:opacity-60"
+              className="w-full bg-destructive text-destructive-foreground font-semibold py-2 rounded-xl mt-2 disabled:opacity-60 hover:bg-destructive/90 hover:shadow-lg hover:shadow-destructive/50 transform transition-all duration-200 hover:scale-105 active:scale-95"
               onClick={handleTrade}
               disabled={!connected || txLoading}
             >
@@ -201,14 +201,14 @@ export const TokenTrade = ({ tokenMint = "", tokenName = "", tokenSymbol = "", d
         </Tabs>
 
         {txStatus && (
-          <div className={`mt-4 text-xs rounded p-2 ${txStatus.startsWith('Success') ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'}`}>
+          <div className={`mt-4 text-xs rounded-lg p-3 border ${txStatus.startsWith('Success') ? 'bg-primary/10 text-primary border-primary/30' : 'bg-destructive/10 text-destructive border-destructive/30'}`}>
             {txStatus}
           </div>
         )}
         
         {!connected && (
           <div className="mt-4 flex justify-center">
-            <WalletMultiButton className="!bg-[#1ED760] !text-black !font-semibold !px-6 !py-2 !rounded !hover:bg-[#1bc653] !transition-colors !border-none" />
+            <WalletMultiButton className="!bg-primary !text-primary-foreground !font-semibold !px-6 !py-2 !rounded-xl !hover:bg-primary/90 !transition-all !duration-200 !border-none !shadow-lg !hover:shadow-primary/50 !transform !hover:scale-105 !active:scale-95" />
           </div>
         )}
       </CardContent>

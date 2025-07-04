@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import { SolanaWalletProvider } from '@/components/wallet/WalletProvider'
-import { ThemeProvider } from '@/components/theme-provider'
+import { Providers } from '@/components/providers'
 
 export const metadata: Metadata = {
   title: 'Token Platform',
@@ -16,12 +15,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <SolanaWalletProvider>
-            {children}
-          </SolanaWalletProvider>
-        </ThemeProvider>
+      <body suppressHydrationWarning={true}>
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   )

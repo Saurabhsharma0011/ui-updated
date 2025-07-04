@@ -58,48 +58,45 @@ const TokenCard = ({
     return `${address.slice(0, 4)}...${address.slice(-4)}`
   }
 
-  const getCategoryBadge = (category?: string) => {
-    switch (category) {
-      case "bonding":
-        return (
-          <Badge variant="secondary" className="bg-blue-600 text-white text-xs">
-            BONDING
-          </Badge>
-        )
-      case "graduated":
-        return (
-          <Badge variant="secondary" className="bg-green-600 text-white text-xs">
-            GRADUATED
-          </Badge>
-        )
-      default:
-        return (
-          <Badge variant="secondary" className="bg-slate-600 text-white text-xs">
-            NEW
-          </Badge>
-        )
-    }
+  const formatPrice = (price: number) => {
+    if (price === 0) return "$0.00"
+    if (price < 0.000001) return `$${price.toExponential(2)}`
+    if (price < 0.01) return `$${price.toFixed(6)}`
+    return `$${price.toFixed(2)}`
   }
 
-  const getBorderColor = (category?: string) => {
-    switch (category) {
-      case "bonding":
-        return "border-l-blue-400"
-      case "graduated":
-        return "border-l-green-400"
-      default:
-        return "border-l-slate-400"
-    }
+  const formatMarketCap = (mcap: number) => {
+    if (mcap >= 1000000) return `$${(mcap / 1000000).toFixed(1)}M`
+    if (mcap >= 1000) return `$${(mcap / 1000).toFixed(1)}K`
+    return `$${mcap.toFixed(0)}`
+  }
+
+  const formatLiquidity = (liquidity: number) => {
+    if (liquidity >= 1000000) return `$${(liquidity / 1000000).toFixed(1)}M`
+    if (liquidity >= 1000) return `$${(liquidity / 1000).toFixed(1)}K`
+    return `$${liquidity.toFixed(0)}`
+  }
+
+  const getBondingCurveProgress = () => {
+    const currentMcap = priceData?.marketCap || token.market_cap_value || 0
+    const targetMcap = 50000 // $50K target
+    const progress = Math.min((currentMcap / targetMcap) * 100, 100)
+    return progress
   }
 
   return (
-    <Card
-      className={`bg-slate-900/50 border-slate-800 border-l-4 ${getBorderColor(token.category)} hover:bg-slate-900/70 transition-colors`}
-    >
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center text-white font-semibold overflow-hidden">
+    <Card className="bg-transparent border-2 border-primary shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/50 transition-all duration-300 hover:scale-[1.02] rounded-2xl overflow-hidden h-full backdrop-blur-sm">
+              {/* Featured Header */}
+        <div className="px-6 py-4 border-b border-primary/30 bg-primary/10">
+          <h4 className="text-lg font-semibold text-foreground">Featured</h4>
+        </div>
+
+      {/* Token Info Section */}
+      <CardContent className="p-6 space-y-5 flex-1">
+        {/* Token Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold overflow-hidden">
               {token.image && token.image !== "/placeholder.svg?height=48&width=48" ? (
                 <img
                   src={token.image || "/placeholder.svg"}
@@ -110,110 +107,108 @@ const TokenCard = ({
                     target.style.display = "none"
                     const parent = target.parentElement
                     if (parent) {
-                      parent.innerHTML = `<span class="text-white font-semibold">${getInitials(token.name)}</span>`
+                      parent.innerHTML = `<span class="text-primary-foreground font-semibold text-xl">${getInitials(token.name)}</span>`
                     }
                   }}
                 />
               ) : (
-                <span className="text-white font-semibold">{getInitials(token.name)}</span>
+                <span className="text-primary-foreground font-semibold text-xl">{getInitials(token.name)}</span>
               )}
             </div>
-            <div className="min-w-0 flex-1">
-              <h3 className="text-white font-semibold text-sm truncate" title={token.name}>
-                {token.name}
-              </h3>
-              <p className="text-slate-400 text-xs">{token.symbol}</p>
-              {token.description && (
-                <p className="text-slate-500 text-xs mt-1 line-clamp-2" title={token.description}>
-                  {token.description}
-                </p>
-              )}
-              <p className="text-slate-600 text-xs mt-1" title={token.mint}>
-                {truncateAddress(token.mint)}
-              </p>
+            <div>
+              <h3 className="font-bold text-lg text-foreground">{token.name}</h3>
+              <p className="text-sm text-muted-foreground">{token.symbol}</p>
             </div>
           </div>
-          <div className="flex flex-col items-end gap-1">
-            <div className="flex items-center gap-1 text-slate-400 text-xs">
-              <Clock className="w-3 h-3" />
-              {timeAgo()}
-            </div>
-            {getCategoryBadge(token.category)}
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">Just now</span>
           </div>
         </div>
 
-        {/* Real-time Price Data */}
-        <div className="mb-3">
-          <PriceDisplay
-            price={priceData?.price || 0}
-            marketCap={priceData?.marketCap || token.market_cap_value || 0}
-            liquidity={priceData?.liquidity || 0}
-            priceChange24h={priceData?.priceChange24h || 0}
-            volume24h={priceData?.volume24h || 0}
-            isLoading={isLoadingPrice}
-          />
+        {/* NEW Badge */}
+        <div className="flex justify-start">
+          <Badge className="bg-primary text-primary-foreground px-3 py-1 text-sm font-medium">
+            NEW
+          </Badge>
         </div>
 
-        {/* Bonding Curve Progress */}
-        {priceData?.curvePercent > 0 && (
-          <div className="mb-3">
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-xs text-slate-400">Bonding Curve</span>
-              <span className="text-xs font-semibold text-blue-400">{priceData.curvePercent.toFixed(2)}%</span>
-            </div>
-            <Progress value={priceData.curvePercent} className="h-2 [&>div]:bg-blue-600" />
+        {/* Stats Grid */}
+        <div className="grid grid-cols-3 gap-4">
+          <div className="space-y-1">
+            <p className="text-sm text-muted-foreground">PRICE</p>
+            <p className="font-semibold text-foreground">
+              {isLoadingPrice 
+                ? "Loading..." 
+                : formatPrice(Number(priceData?.price || 0))
+              }
+            </p>
           </div>
-        )}
+          <div className="space-y-1">
+            <p className="text-sm text-muted-foreground">MARKET CAP</p>
+            <p className="font-semibold text-foreground">
+              {formatMarketCap(priceData?.marketCap || token.market_cap_value || 0)}
+            </p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-sm text-muted-foreground">LIQUIDITY</p>
+            <p className="font-semibold text-foreground">
+              {isLoadingPrice 
+                ? "Loading..." 
+                : formatLiquidity(Number(priceData?.liquidity || 0))
+              }
+            </p>
+          </div>
+        </div>
+
+        {/* Bonding Curve */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">Bonding Curve</p>
+            <p className="text-sm font-semibold text-accent">
+              {getBondingCurveProgress().toFixed(2)}%
+            </p>
+          </div>
+          <div className="w-full bg-secondary rounded-full h-2">
+            <div 
+              className="bg-accent h-2 rounded-full transition-all duration-500"
+              style={{ width: `${getBondingCurveProgress()}%` }}
+            />
+          </div>
+        </div>
 
         {/* Creator Info */}
-        <div className="mb-3 pb-2 border-b border-slate-800">
-          <div className="flex justify-between">
-            <div>
-              <p className="text-slate-500 text-xs">Creator</p>
-              <p className="text-slate-300 text-xs font-mono" title={token.creator}>
-                {truncateAddress(token.creator)}
-              </p>
-            </div>
-            {isDexPaid && (
-              <div className="text-right">
-                <p className="text-slate-500 text-xs">DEX PAID</p>
-                <p className="text-green-400 text-xs font-mono">✅</p>
-              </div>
-            )}
-          </div>
-          {/* Show bonding curve key if available */}
-          {token.bondingCurveKey && (
-            <div className="mt-2">
-              <p className="text-slate-500 text-xs">Bonding Curve</p>
-              <p className="text-blue-300 text-xs font-mono" title={token.bondingCurveKey}>
-                {truncateAddress(token.bondingCurveKey)}
-              </p>
-            </div>
-          )}
+        <div className="space-y-1">
+          <p className="text-sm text-muted-foreground">Creator:</p>
+          <p className="text-sm font-mono text-foreground">{truncateAddress(token.creator)}</p>
         </div>
 
-        {/* Social Links with Emojis */}
-        <SocialLinks twitter={token.twitter} telegram={token.telegram} website={token.website} />
-        
-        {/* Buy/Sell Functionality */}
-        <div className="mt-3 pt-3 border-t border-slate-800 flex gap-2">
-          <Button 
-            className="flex-1 bg-blue-600 hover:bg-blue-700"
+        {/* Social Links */}
+        <div className="flex items-center gap-3">
+          <SocialLinks twitter={token.twitter} telegram={token.telegram} website={token.website} />
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-3 pt-2">
+          <Button
             onClick={() => onOpenDetail(token)}
+            variant="outline"
+            size="sm"
+            className="flex-1 bg-transparent border-border text-foreground hover:bg-secondary hover:shadow-lg hover:shadow-primary/30 rounded-xl transform transition-all duration-200 hover:scale-105 active:scale-95"
           >
             <BarChart3 className="w-4 h-4 mr-2" />
-            View Details
-            {token.bondingCurveKey && (
-              <span className="ml-1 w-2 h-2 bg-green-400 rounded-full" title="Chart data available"></span>
-            )}
+            Details
           </Button>
           <Dialog>
             <DialogTrigger asChild>
-              <Button className="flex-1 bg-green-600 hover:bg-green-700">
+              <Button
+                size="sm"
+                className="flex-1 bg-primary hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/50 text-primary-foreground rounded-xl transform transition-all duration-200 hover:scale-105 active:scale-95"
+              >
                 Trade {token.symbol}
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-md">
+            <DialogContent className="bg-card border-border text-foreground max-w-md">
               <DialogHeader>
                 <DialogTitle>Trade {token.name} ({token.symbol})</DialogTitle>
               </DialogHeader>
@@ -239,19 +234,21 @@ const TokenCard = ({
 
 const WalletConnectButton = () => {
   return (
-    <WalletMultiButton className="!bg-blue-600 !hover:bg-blue-700 !text-white !font-semibold !px-4 !py-2 !rounded !border-none !h-[38px]" />
+            <WalletMultiButton className="!bg-primary !hover:bg-primary/90 !hover:shadow-lg !hover:shadow-primary/50 !text-primary-foreground !font-semibold !px-4 !py-2 !rounded-xl !border-none !h-[38px] !transform !transition-all !duration-200 !hover:scale-105 !active:scale-95" />
   )
 }
 
 export default function TokenPlatform() {
-  const [activeTab, setActiveTab] = useState<"new" | "bonding" | "graduated">("new")
+  const [activeTab, setActiveTab] = useState<"new" | "trending" | "graduated">("new")
   const [selectedToken, setSelectedToken] = useState<TokenData | null>(null)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
   const {
     allTokens,
     newTokens,
     bondingTokens,
     graduatedTokens,
+    trendingTokens,
     isConnected,
     error,
     rawMessages,
@@ -272,39 +269,67 @@ export default function TokenPlatform() {
 
   // Get tokens for current tab
   const getDisplayTokens = () => {
+    let tokens;
     switch (activeTab) {
-      case "bonding":
-        return bondingTokens
+      case "trending":
+        tokens = trendingTokens
+        break
       case "graduated":
-        return graduatedTokens
+        tokens = graduatedTokens
+        break
       default:
-        return newTokens
+        tokens = newTokens
+        break
     }
+
+    // Filter tokens based on search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase()
+      tokens = tokens.filter(token => 
+        token.name.toLowerCase().includes(query) ||
+        token.symbol.toLowerCase().includes(query) ||
+        token.mint.toLowerCase().includes(query) ||
+        token.description.toLowerCase().includes(query)
+      )
+    }
+
+    return tokens
   }
 
   const displayTokens = getDisplayTokens()
 
+  const handleSearch = () => {
+    // Search functionality is handled by the getDisplayTokens filter
+    // This function can be used for additional search actions if needed
+  }
+
+  const clearSearch = () => {
+    setSearchQuery("")
+  }
+
   const getTabDescription = (tab: string) => {
     switch (tab) {
-      case "bonding":
-        return "Tokens with market cap between $10K - $50K"
+      case "new":
+        return "Fresh tokens just launched on the platform"
+      case "trending":
+        return "Tokens with the highest market cap values"
       case "graduated":
-        return "Tokens that crossed bonding curve (>$50K market cap)"
+        return "Established tokens that have graduated from bonding curves"
       default:
-        return "Recently created tokens (<$10K market cap)"
+        return ""
     }
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Navbar */}
-      <nav className="border-b border-slate-800 px-6 py-4">
+      <nav className="border-b border-primary/30 px-6 py-4 bg-black/50 backdrop-blur-sm">
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-8">
             <h1 className="text-xl font-bold">TokenPlatform</h1>
             <div className="flex gap-4">
-              <a href="/" className="text-white hover:text-blue-400 transition-colors">Home</a>
-              <a href="/trade" className="text-white hover:text-blue-400 transition-colors">Trade</a>
+              <a href="/" className="text-foreground hover:text-primary transition-all duration-200 hover:scale-105 px-3 py-2 rounded-lg hover:bg-secondary/20">Home</a>
+              <a href="/trade" className="text-foreground hover:text-primary transition-all duration-200 hover:scale-105 px-3 py-2 rounded-lg hover:bg-secondary/20">Trade</a>
             </div>
             <ConnectionStatus isConnected={isConnected} error={error} rawMessages={rawMessages} />
           </div>
@@ -314,18 +339,23 @@ export default function TokenPlatform() {
               onClick={refetchPrices}
               variant="outline"
               size="sm"
-              className="bg-transparent border-slate-600 text-slate-400 hover:bg-slate-800"
+              className="bg-transparent border-border text-foreground hover:bg-secondary hover:shadow-lg hover:shadow-primary/30 rounded-xl transform transition-all duration-200 hover:scale-105 active:scale-95"
               disabled={isPriceLoading}
             >
               <RefreshCw className={`w-3 h-3 mr-1 ${isPriceLoading ? "animate-spin" : ""}`} />
               {isPriceLoading ? "Loading..." : "Refresh Prices"}
             </Button>
             {Object.keys(priceData).length > 0 && (
-              <Badge variant="secondary" className="bg-green-600 text-white text-xs">
+              <Badge variant="secondary" className="bg-primary text-primary-foreground text-xs">
                 {Object.keys(priceData).length} prices loaded
               </Badge>
             )}
-            <Button className="bg-blue-600 hover:bg-blue-700">
+            {activeTab === "trending" && (
+              <Badge variant="secondary" className="bg-accent text-accent-foreground text-xs">
+                {trendingTokens.length} trending tokens
+              </Badge>
+            )}
+            <Button className="bg-primary hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/50 rounded-xl transform transition-all duration-200 hover:scale-105 active:scale-95">
               <Plus className="w-4 h-4 mr-2" />
               Create Token
             </Button>
@@ -334,8 +364,63 @@ export default function TokenPlatform() {
         </div>
       </nav>
 
+      {/* Hero Section */}
+      <div className="w-full py-20 px-6">
+        <div className="max-w-4xl mx-auto text-center">
+          {/* Hero Title */}
+          <h1 className="text-6xl md:text-7xl font-bold mb-12">
+            <span className="text-foreground">reeveal</span>
+            <span className="text-primary">.fun</span>
+          </h1>
+
+          {/* Search Bar */}
+          <div className="max-w-2xl mx-auto">
+            <div className="flex items-center bg-transparent border-2 border-primary shadow-lg shadow-primary/30 rounded-xl overflow-hidden backdrop-blur-sm">
+              <input
+                type="text"
+                placeholder="Search for Token by name or address"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="flex-1 px-6 py-4 bg-transparent text-foreground placeholder:text-muted-foreground focus:outline-none text-lg"
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              />
+              <button
+                onClick={handleSearch}
+                className="px-8 py-4 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold transition-all duration-200 hover:shadow-lg hover:shadow-primary/50 transform hover:scale-105 active:scale-95"
+              >
+                Search
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Main Content */}
       <div className="w-full px-6 py-8">
+        {/* Debug Info for Trending Tokens */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mb-4 p-4 bg-primary/10 border border-primary/30 rounded-lg">
+            <h3 className="text-sm font-semibold text-primary mb-2">Debug: Trending Tokens Info</h3>
+            <div className="text-xs text-muted-foreground space-y-1">
+              <p>Total tokens: {allTokens.length}</p>
+              <p>Trending tokens: {trendingTokens.length}</p>
+              <p>Tokens with market cap: {allTokens.filter(t => t.market_cap_value && t.market_cap_value > 0).length}</p>
+              <p>Tokens with price data: {allTokens.filter(t => t.price).length}</p>
+              <p>Recent tokens (24h): {allTokens.filter(t => t.created_timestamp > Date.now() - 24 * 60 * 60 * 1000).length}</p>
+              {trendingTokens.length > 0 && (
+                <div className="mt-2">
+                  <p className="font-semibold">Top 3 trending:</p>
+                  {trendingTokens.slice(0, 3).map(token => (
+                    <p key={token.mint} className="ml-2">
+                      {token.symbol}: ${token.market_cap_value?.toLocaleString() || 'N/A'} mcap
+                    </p>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Bonding Curve Debug Panel */}
         <BondingCurveDebug 
           tokens={allTokens}
@@ -347,45 +432,45 @@ export default function TokenPlatform() {
         <div className="flex gap-8 mb-8">
           <button
             onClick={() => setActiveTab("new")}
-            className={`flex items-center gap-2 pb-4 border-b-2 transition-colors ${
-              activeTab === "new" ? "border-slate-400 text-white" : "border-transparent text-slate-400 hover:text-white"
+            className={`flex items-center gap-2 pb-4 border-b-2 transition-all duration-300 hover:scale-105 ${
+              activeTab === "new" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
-            <div className="w-3 h-6 bg-slate-400 rounded-sm"></div>
+            <div className="w-3 h-6 bg-primary rounded-sm"></div>
             <span className="text-lg font-semibold">New Tokens</span>
-            <Badge variant="secondary" className="bg-slate-600 text-white text-xs">
+            <Badge variant="secondary" className="bg-primary text-primary-foreground text-xs">
               {newTokens.length}
             </Badge>
             <Info className="w-4 h-4" />
           </button>
 
           <button
-            onClick={() => setActiveTab("bonding")}
-            className={`flex items-center gap-2 pb-4 border-b-2 transition-colors ${
-              activeTab === "bonding"
-                ? "border-blue-400 text-white"
-                : "border-transparent text-slate-400 hover:text-white"
+            onClick={() => setActiveTab("trending")}
+            className={`flex items-center gap-2 pb-4 border-b-2 transition-all duration-300 hover:scale-105 ${
+              activeTab === "trending"
+                ? "border-primary text-foreground"
+                : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
-            <div className="w-3 h-6 bg-blue-400 rounded-sm"></div>
-            <span className="text-lg font-semibold">Bonding Tokens</span>
-            <Badge variant="secondary" className="bg-blue-600 text-white text-xs">
-              {bondingTokens.length}
+            <div className="w-3 h-6 bg-primary rounded-sm"></div>
+            <span className="text-lg font-semibold">Trending Tokens</span>
+            <Badge variant="secondary" className="bg-primary text-primary-foreground text-xs">
+              {trendingTokens.length}
             </Badge>
             <Info className="w-4 h-4" />
           </button>
 
           <button
             onClick={() => setActiveTab("graduated")}
-            className={`flex items-center gap-2 pb-4 border-b-2 transition-colors ${
+            className={`flex items-center gap-2 pb-4 border-b-2 transition-all duration-300 hover:scale-105 ${
               activeTab === "graduated"
-                ? "border-green-400 text-white"
-                : "border-transparent text-slate-400 hover:text-white"
+                ? "border-primary text-foreground"
+                : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
-            <div className="w-3 h-6 bg-green-400 rounded-sm"></div>
+            <div className="w-3 h-6 bg-primary rounded-sm"></div>
             <span className="text-lg font-semibold">Graduated Tokens</span>
-            <Badge variant="secondary" className="bg-green-600 text-white text-xs">
+            <Badge variant="secondary" className="bg-primary text-primary-foreground text-xs">
               {graduatedTokens.length}
             </Badge>
             <Info className="w-4 h-4" />
@@ -394,11 +479,21 @@ export default function TokenPlatform() {
 
         {/* Tab Description */}
         <div className="mb-6">
-          <p className="text-slate-400 text-sm">{getTabDescription(activeTab)}</p>
+          <p className="text-muted-foreground text-sm">
+            {searchQuery.trim() ? `Search results for "${searchQuery}" in ${activeTab} tokens` : getTabDescription(activeTab)}
+          </p>
+          {searchQuery.trim() && (
+            <button
+              onClick={clearSearch}
+              className="mt-2 text-primary hover:text-primary/80 text-sm underline"
+            >
+              Clear search
+            </button>
+          )}
         </div>
 
         {/* Token Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {displayTokens.length > 0 ? (
             displayTokens.map((token) => (
               <TokenCard
@@ -411,10 +506,28 @@ export default function TokenPlatform() {
             ))
           ) : (
             <div className="col-span-full text-center py-12">
-              <p className="text-slate-400 text-lg">
-                {isConnected ? `No ${activeTab} tokens available yet...` : "Connecting to live feed..."}
+              <p className="text-muted-foreground text-lg">
+                {searchQuery.trim() 
+                  ? `No tokens found matching "${searchQuery}" in ${activeTab} tokens`
+                  : isConnected 
+                    ? `No ${activeTab} tokens available yet...` 
+                    : "Connecting to live feed..."
+                }
               </p>
-              <p className="text-slate-500 text-sm mt-2">{getTabDescription(activeTab)}</p>
+              <p className="text-muted-foreground text-sm mt-2">
+                {searchQuery.trim() 
+                  ? "Try a different search term or browse all tokens below"
+                  : getTabDescription(activeTab)
+                }
+              </p>
+              {searchQuery.trim() && (
+                <button
+                  onClick={clearSearch}
+                  className="mt-4 px-6 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl transition-all duration-200 hover:shadow-lg hover:shadow-primary/50 transform hover:scale-105 active:scale-95"
+                >
+                  Clear search and browse all tokens
+                </button>
+              )}
             </div>
           )}
         </div>

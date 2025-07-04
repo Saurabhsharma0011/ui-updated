@@ -80,22 +80,22 @@ const CandlestickChartComponent = ({ data, isLoading, onRefresh, tokenSymbol }: 
 
       chart = createChart(chartContainerRef.current, {
         layout: {
-          background: { type: ColorType.Solid, color: '#0f172a' },
-          textColor: '#94a3b8',
+          background: { type: ColorType.Solid, color: '#000000' },
+          textColor: '#22c55e',
         },
         grid: {
-          vertLines: { color: '#1e293b' },
-          horzLines: { color: '#1e293b' },
+          vertLines: { color: '#1a5e1a' },
+          horzLines: { color: '#1a5e1a' },
         },
         crosshair: {
           mode: 1, // Magnet
         },
         rightPriceScale: {
-          borderColor: '#334155',
+          borderColor: '#166534',
           precision: 8, // Increase precision for low-priced tokens
         },
         timeScale: {
-          borderColor: '#334155',
+          borderColor: '#166534',
           timeVisible: true,
           secondsVisible: true,
         },
@@ -172,13 +172,13 @@ const CandlestickChartComponent = ({ data, isLoading, onRefresh, tokenSymbol }: 
   }
 
   return (
-    <div className="w-full bg-slate-950 rounded-lg p-4">
+    <div className="w-full bg-black rounded-lg p-4">
       {/* Chart Header with Stats */}
       {chartStats && (
         <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-6">
             <div>
-              <p className="text-slate-400 text-xs uppercase tracking-wide">Current Price</p>
+              <p className="text-green-400 text-xs uppercase tracking-wide">Current Price</p>
               <div className="flex items-center gap-2">
                 <p className="text-white font-bold text-lg">{formatPrice(chartStats.currentPrice)}</p>
                 <div className={`flex items-center gap-1 ${chartStats.priceChange >= 0 ? 'text-green-400' : 'text-red-400'}`}>
@@ -194,15 +194,15 @@ const CandlestickChartComponent = ({ data, isLoading, onRefresh, tokenSymbol }: 
               </div>
             </div>
             <div>
-              <p className="text-slate-400 text-xs uppercase tracking-wide">24h Volume</p>
+              <p className="text-green-400 text-xs uppercase tracking-wide">24h Volume</p>
               <p className="text-white font-semibold">{formatVolume(chartStats.volume24h)}</p>
             </div>
             <div>
-              <p className="text-slate-400 text-xs uppercase tracking-wide">24h High</p>
+              <p className="text-green-400 text-xs uppercase tracking-wide">24h High</p>
               <p className="text-white font-semibold">{formatPrice(chartStats.high24h)}</p>
             </div>
             <div>
-              <p className="text-slate-400 text-xs uppercase tracking-wide">24h Low</p>
+              <p className="text-green-400 text-xs uppercase tracking-wide">24h Low</p>
               <p className="text-white font-semibold">{formatPrice(chartStats.low24h)}</p>
             </div>
           </div>
